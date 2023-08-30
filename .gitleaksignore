@@ -1,0 +1,4 @@
+age-key/key.txt:generic-api-key:2
+age-key/key.txt:age secret key:3
+local-setup/tap-poc-services/gitea/data/conf/app.ini:generic-api-key:25
+local-setup/tap-poc-services/gitea/data/conf/app.ini:generic-api-key:67

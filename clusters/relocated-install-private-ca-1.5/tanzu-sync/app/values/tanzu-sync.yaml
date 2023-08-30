@@ -1,0 +1,11 @@
+---
+git:
+  url: https://gitlab.eng.vmware.com/cdelashmutt/tap-poc-gitops.git
+  ref: origin/main
+  sub_path: clusters/relocated-install-private-ca-1.5/cluster-config
+tap_package_repository:
+  oci_repository: registry.mac.grogscave.net:8443/tap/tap-packages
+tap_install:
+  version:
+    package_version: 1.5.0
+    package_repo_bundle_tag: 1.5.0

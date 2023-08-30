@@ -1,0 +1,107 @@
+version: "3"
+
+services:
+  registry_htpasswd_create:
+    image: httpd:2
+    container_name: registry_htpasswd_create
+    entrypoint: "htpasswd"
+    command: ["-Bbc", "/auth/htpasswd", "reguser", "regpassword"]
+    volumes:
+      - ./registry/auth:/auth
+      
+  registry:
+    image: registry:2
+    container_name: registry
+    environment:
+      - REGISTRY_AUTH=htpasswd
+      - REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm
+      - REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd
+      - REGISTRY_HTTP_TLS_CERTIFICATE=/certs/cert.crt
+      - REGISTRY_HTTP_TLS_KEY=/certs/key.key
+      - REGISTRY_STORAGE_DELETE_ENABLED=true
+      - REGISTRY_VALIDATION_DISABLED=true
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    restart: unless-stopped
+    volumes:
+      - ../certs/registry.crt:/certs/cert.crt
+      - ../certs/registry.key:/certs/key.key
+      - ./registry/auth:/auth
+      - ./registry/data:/var/lib/registry
+    ports:
+      - "8443:5000" 
+    expose:
+      - "8443"
+    depends_on:
+      registry_htpasswd_create:
+        condition: service_completed_successfully
+
+  gitea:
+    image: gitea/gitea:1.19.3-rootless
+    container_name: gitea
+    user: "1000:1000"
+    environment: 
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__server__PROTOCOL=https
+      - GITEA__server__DOMAIN=gitea.h2o-4-11800.h2o.vmware.com
+      - GITEA__server__SSH_DOMAIN=gitea.h2o-4-11800.h2o.vmware.com
+      - GITEA__server__ROOT_URL=https://gitea.h2o-4-11800.h2o.vmware.com:3000/
+      - GITEA__server__CERT_FILE=/certs/cert.pem
+      - GITEA__server__KEY_FILE=/certs/key.pem
+      - GITEA__server__OFFLINE_MODE=true
+      - GITEA__service__DEFAULT_ALLOW_CREATE_ORGANIZATION=true
+      - GITEA__repository__ENABLE_PUSH_CREATE_USER=true
+      - GITEA__repository__ENABLE_PUSH_CREATE_ORG=true
+    restart: unless-stopped
+    volumes: 
+      - ./gitea/data:/var/lib/gitea
+      - ./gitea/config:/etc/gitea
+      - ../certs/gitea.crt:/certs/cert.pem
+      - ../certs/gitea.key:/certs/key.pem
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "3000:3000"
+      - "222:22"
+    expose:
+      - "3000"
+      - "222"
+    depends_on:
+      gitea_add_admin:
+        condition: service_completed_successfully
+
+  gitea_add_admin:
+    image: gitea/gitea:1.19.3-rootless
+    container_name: gitea_add_admin
+    command: ["bash", "-c", "gitea migrate && gitea admin user create --username gitea_admin --password gitea_admin --email cdelashmutt@vmware.com --admin || exit 0"]
+    user: "1000:1000"
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+    volumes:
+      - ./gitea/data:/var/lib/gitea
+      - ./gitea/config:/etc/gitea
+      - ../certs/gitea.crt:/certs/cert.pem
+      - ../certs/gitea.key:/certs/key.pem
+      - /etc/localtime:/etc/localtime:ro
+
+  reposilite:
+    image: dzikoysk/reposilite:3.4.3
+    container_name: reposilite
+    environment:
+      - PATH=/usr/local/openjdk-19/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - JAVA_HOME=/usr/local/openjdk-19
+      - LANG=C.UTF-8
+      - JAVA_VERSION=19
+      - REPOSILITE_OPTS=--token mavenuser:mavenpassword --shared-configuration=configuration.shared.cdn --local-configuration-mode=none
+    restart: unless-stopped
+    volumes:
+      - ./reposilite/data:/app/data
+      - ../certs/reposilite.crt:/certs/cert.pem:ro
+      - ../certs/reposilite.key:/certs/key.pem:ro
+    working_dir: /app
+    ports:
+      - "3001:443"
+    expose:
+      - "3001"
+    stdin_open: true
+    tty: true

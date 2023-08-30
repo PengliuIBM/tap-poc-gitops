@@ -1,0 +1,131 @@
+tap_install:
+  values:
+    shared:
+      # CHANGEME
+      ingress_domain: 127-0-0-1.nip.io
+      ingress_issuer: ""
+      # CHANGEME
+      ca_cert_data: |
+          -----BEGIN CERTIFICATE-----
+          MIIDgjCCAmoCCQCZC/GZ1Q3EdDANBgkqhkiG9w0BAQsFADCBgjELMAkGA1UEBhMC
+          VVMxEDAOBgNVBAgMB0dlb3JnaWExFjAUBgNVBAcMDUhvbGx5IFNwcmluZ3MxEjAQ
+          BgNVBAoMCUdyb2dzY2F2ZTESMBAGA1UEAwwJTWFjYm9va0NBMSEwHwYJKoZIhvcN
+          AQkBFhJncm9nQGdyb2dzY2F2ZS5uZXQwHhcNMjIxMjA1MTcxOTAxWhcNMjcxMjA0
+          MTcxOTAxWjCBgjELMAkGA1UEBhMCVVMxEDAOBgNVBAgMB0dlb3JnaWExFjAUBgNV
+          BAcMDUhvbGx5IFNwcmluZ3MxEjAQBgNVBAoMCUdyb2dzY2F2ZTESMBAGA1UEAwwJ
+          TWFjYm9va0NBMSEwHwYJKoZIhvcNAQkBFhJncm9nQGdyb2dzY2F2ZS5uZXQwggEi
+          MA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCkxyItoW5YUYrkQJrRq+gO041w
+          CwEurFJB6Y5gSkDSHdcag/+mLkBLQaRUwfewjgJPWYWLLOC3s+Qiz3XYo4tQ42aV
+          OjOjLCIPlDWKk7x2gM2jKw6+FnSjJqRuM78sQrroaqsPpzmy2TUrt4m6cjQdrvEY
+          EfTRXPpWYEGmu3swtPo0qof68QBpI+ezgH+OGaNecPZt2jqSi9rXfijX2LngpLaP
+          nnaBfmQdUUav2ZyRaoPxV11mtHKQVX4K/2TlOwlWjn423Uxu0q6cvCrY6xv/56A1
+          W7OMBEMTOjEwgZMGyNGrKRfM7c/mWw5EEO7e4LfVZyVFR+ESrmGkFTC90JsvAgMB
+          AAEwDQYJKoZIhvcNAQELBQADggEBAFZbXSL+Xyxp5qp/3uKCXpQLTqgHyEQ4IEey
+          PEDIbDBX8Wk/3sTgdvT9eDd6NgwQPYdb/OJagBo6b/K+Z2nVZIh1hEHR6XoMxwOJ
+          XO8DnGBil9ZIzpo3yN5LfHaRHPZ3+ot4pQFyxoezamI5Oqncg97wEASDeGZ9FwhM
+          M7Ngj7gJVJOPyKDQdCeDkK9IKN30u8IFLi1aB7k+iggW5oIb5+8P/oNZl6VsfdBk
+          FXAniCaH2U5/WxgurugulLahnG84cYlvoDwZaprr/tadbPfTassiX5N6hQTfGQbX
+          q6HkrXro+gOSdimHtqmVhY/b2OO8OQRyps4u/i0f4oC8XJKfeUE=
+          -----END CERTIFICATE-----
+    tap_gui:
+      metadataStoreAutoconfiguration: true
+      service_type: ClusterIP
+      tls:
+        namespace: "tap-install"
+        secretName: "tap-wildcard"
+      app_config:
+        app:
+          # CHANGEME
+          baseUrl: &TAP-GUI-URL "https://tap-gui.127-0-0-1.nip.io"
+        backend:
+          baseUrl: *TAP-GUI-URL
+          cors:
+            baseUrl: *TAP-GUI-URL
+    grype:
+      db:
+        dbUpdateUrl: http://grype-db-server.grype-db-server.svc/listing.json
+      certissuer: YOUR-ISSUER
+    namespace_provisioner:
+      controller: false
+      additional_sources:
+      - git:
+          ref: origin/main
+          subPath: clusters/relocated-install-private-ca-1.5/namespace-provisioner/testing-scanning-supplychain
+          # CHANGEME
+          url: &GIT-REPO-URL https://gitea.mac.grogscave.net:3000/gitea_admin/tap-gitops
+          secretRef:
+            name: git-auth
+            namespace: tap-install
+            create_export: true
+        path: _ytt_lib/testing-scanning-supplychain-setup
+      - git:
+          ref: origin/main
+          subPath: clusters/relocated-install-private-ca-1.5/namespace-provisioner/credentials 
+          url: *GIT-REPO-URL
+          secretRef:
+            name: git-auth-2
+            namespace: tap-install
+            create_export: true
+        path: _ytt_lib/credentials
+      gitops_install:
+        ref: origin/main
+        subPath: clusters/relocated-install-private-ca-1.5/namespace-provisioner/gitops-install
+        url: *GIT-REPO-URL
+        secretRef:
+          name: git-auth-3
+          namespace: tap-install
+          create_export: true
+      import_data_values_secrets:
+      - name: workload-maven-auth
+        namespace: tap-install
+        create_export: true
+      - name: workload-git-auth
+        namespace: tap-install
+        create_export: true
+      - name: workload-javatrust-auth
+        namespace: tap-install
+        create_export: true
+      overlay_secrets:
+      - name: credential-overlay
+        namespace: tap-install
+        create_export: true
+    profile: full
+    ceip_policy_disclosed: true
+    buildservice:
+      exclude_dependencies: true
+    supply_chain: testing_scanning
+    ootb_supply_chain_testing:
+      git_implementation: libgit2
+      gitops:
+        ssh_secret: git
+    ootb_supply_chain_testing_scanning:
+      git_implementation: libgit2
+      gitops:
+        ssh_secret: git 
+    appliveview:
+      tls:
+        namespace: "tap-install"
+        secretName: "tap-wildcard"
+    metadata_store:
+      ns_for_export_app_cert: "*"
+      app_service_type: ClusterIP
+      ingress_enabled: "true"
+    accelerator:
+      tls:
+        namespace: "tap-install"
+        secretName: "tap-wildcard"
+      samples:
+        include: false
+      ingress:
+        include: true
+    cnrs:
+      default_tls_secret: tap-install/tap-wildcard
+      domain_template: |-
+        {{- .Name}}-{{.Namespace -}}.{{.Domain}}
+    package_overlays:
+    - name: "ootb-templates"
+      secrets:
+      - name: "ootb-templates-overlay-maven"
+    excluded_packages:
+    - learningcenter.tanzu.vmware.com
+    - workshops.learningcenter.tanzu.vmware.com

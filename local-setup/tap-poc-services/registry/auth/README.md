@@ -1,0 +1,1 @@
+htpasswd directory for the registry

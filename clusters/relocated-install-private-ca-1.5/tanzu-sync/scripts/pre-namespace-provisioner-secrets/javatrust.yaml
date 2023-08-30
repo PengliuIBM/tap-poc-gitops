@@ -1,0 +1,12 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:base64", "base64")
+#@ load("@ytt:yaml", "yaml")
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: workload-javatrust-auth
+  namespace: tap-install
+type: Opaque
+data:
+  java-trust.yaml: #@ base64.encode(yaml.encode({"javatrust": {"password": data.values.secrets.javatrust.password}}))

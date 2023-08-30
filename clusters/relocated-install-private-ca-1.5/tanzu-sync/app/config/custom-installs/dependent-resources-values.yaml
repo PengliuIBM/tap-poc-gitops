@@ -1,0 +1,14 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dependent-resources-values
+  namespace: tanzu-sync
+type: Opaque
+stringData:
+  #@yaml/text-templated-strings
+  values.yaml: |
+    tap_repository: (@= data.values.tap_package_repository.oci_repository.rsplit("/",1)[0] @)
+    git_server: (@= data.values.git.url.rsplit("/",1)[0] @)
+    git_ref: (@= data.values.git.ref.rsplit("/",1)[1] @)

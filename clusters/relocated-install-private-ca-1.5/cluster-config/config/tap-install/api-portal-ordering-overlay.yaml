@@ -1,0 +1,23 @@
+#@ load("@ytt:overlay", "overlay")
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: api-portal-ordering
+  namespace: tap-install
+stringData:
+  api-portal-ordering.yaml: |
+    #@ load("@ytt:overlay", "overlay")
+    #@overlay/match by=overlay.subset({"kind":"PackageInstall", "metadata": {"name": "api-portal"}}),expects=1
+    ---
+    metadata:
+      annotations:
+        #@overlay/match missing_ok=True
+        kapp.k14s.io/change-rule.contour: "upsert after upserting contour" 
+
+#@overlay/match by=overlay.subset({"kind":"PackageInstall", "metadata": {"name": "tap"}}),expects=1
+---
+metadata:
+  annotations:
+    #@overlay/match missing_ok=True
+    ext.packaging.carvel.dev/ytt-paths-from-secret-name.0: api-portal-ordering

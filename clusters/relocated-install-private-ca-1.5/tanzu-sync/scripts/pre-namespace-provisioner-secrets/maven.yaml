@@ -1,0 +1,12 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:base64", "base64")
+#@ load("@ytt:yaml", "yaml")
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: workload-maven-auth
+  namespace: tap-install
+type: Opaque
+data:
+  maven.yaml: #@ base64.encode(yaml.encode({"maven": {"url": data.values.secrets.maven.url, "username": data.values.secrets.maven.username, "password": data.values.secrets.maven.password}}))

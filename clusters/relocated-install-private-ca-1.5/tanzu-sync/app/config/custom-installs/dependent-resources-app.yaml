@@ -1,0 +1,26 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: dependent-resources
+  namespace: tanzu-sync
+  annotations:
+    kapp.k14s.io/change-rule.0: "upsert after upserting tanzu-sync"
+    kapp.k14s.io/change-rule.1: "delete before deleting tanzu-sync"
+spec:
+  serviceAccountName: sync-sa
+  fetch:
+    - git:
+        ref: #@ data.values.git.ref
+        url: #@ data.values.git.url
+        subPath: #@ "{}/dependent-resources".format(data.values.git.sub_path.rsplit("/",1)[0])
+        secretRef:
+          name: sync-git-auth
+  template:
+    - ytt:
+        valuesFrom:
+        - secretRef:
+            name: dependent-resources-values
+  deploy:
+    - kapp: {}

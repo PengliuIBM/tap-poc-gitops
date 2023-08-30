@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+[ $# -eq 0 ] && { printf "Usage:\n $0 vcenter-fqdn-or-ip\n\nExample:\n $0 10.4.2.1\n"; exit 1; }
+
+VCENTER_SERVER=$1
+
+wget https://$VCENTER_SERVER/certs/download.zip --no-check-certificate -O /tmp/vcenter-ca-certs.zip
+
+unzip /tmp/vcenter-ca-certs.zip -d /tmp/vcenter-ca-certs
+
+for cert in /tmp/vcenter-ca-certs/certs/lin/*.?; do
+  basefile=$(basename "$cert" | sed 's/\(.*\)\..*/\1/')
+  cp $cert /usr/local/share/ca-certificates/$basefile.crt
+done
+
+rm -rf /tmp/vcenter-ca-certs.zip /tmp/vcenter-ca-certs
+
+update-ca-certificates

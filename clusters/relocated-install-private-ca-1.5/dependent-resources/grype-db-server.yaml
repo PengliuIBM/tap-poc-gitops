@@ -1,0 +1,66 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: grype-db-server
+  annotations:
+    kapp.k14s.io/change-group: "grype-db-server"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: install-registry-dockerconfig
+  namespace: grype-db-server
+  annotations:
+    kapp.k14s.io/change-group: "grype-db-server"
+    secretgen.carvel.dev/image-pull-secret: ""
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: e30K
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grype-db-server
+  namespace: grype-db-server
+  annotations:
+    kapp.k14s.io/change-group: "grype-db-server"
+spec:
+  selector:
+    matchLabels:
+      app: grype-db-server
+  template:
+    metadata:
+      labels:
+        app: grype-db-server
+    spec:
+      containers:
+      - name: grype-db-server
+        image: #@ "{}/grype-db-server:latest".format(data.values.tap_repository)
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "5m"
+          limits:
+            memory: "512Mi"
+        ports:
+        - name: http-port
+          containerPort: 8080
+      imagePullSecrets:
+      - name: install-registry-dockerconfig
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grype-db-server
+  namespace: grype-db-server
+  annotations:
+    kapp.k14s.io/change-group: "grype-db-server"
+spec:
+  selector:
+    app: grype-db-server
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: http-port

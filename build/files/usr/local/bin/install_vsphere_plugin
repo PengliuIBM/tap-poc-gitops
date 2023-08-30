@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+[ $# -eq 0 ] && { printf "Usage:\n $0 wcp-server-url\n\nExample:\n $0 https://10.4.2.1\n"; exit 1; }
+
+WCP_SERVER=$1
+#String any training slashes
+WCP_SERVER=$(echo "$WCP_SERVER" | sed 's:/*$::')
+
+wget $WCP_SERVER/wcp/plugin/linux-amd64/vsphere-plugin.zip -O /tmp/vsphere-plugin.zip
+
+unzip /tmp/vsphere-plugin.zip -d /tmp/vsphere-plugin
+
+install -D -p -m 755 /tmp/vsphere-plugin/bin/kubectl-vsphere /usr/local/bin/kubectl-vsphere
+
+rm /tmp/vsphere-plugin.zip
+rm -rf /tmp/vsphere-plugin

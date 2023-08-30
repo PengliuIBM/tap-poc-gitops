@@ -1,0 +1,1 @@
+Put all CA certs you need to trust into a the localCA.pem file in this directory

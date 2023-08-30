@@ -1,0 +1,6 @@
+**/.git
+local-setup
+.envrc
+.sopsrc
+Dockerfile
+setup-repo.sh

@@ -1,0 +1,64 @@
+#@ load("@ytt:data", "data")
+#@ def in_list(key, list):
+#@  return hasattr(data.values.tap_values, key) and (data.values.tap_values[key] in list)
+#@ end
+#! This if condition ensures that this Java Tekton pipeline is only created if the supply chain is testing or testing_scanning, and the TAP profile used is full, iterate or build.
+#@ if/end in_list('supply_chain', ['testing', 'testing_scanning']) and in_list('profile', ['full', 'iterate', 'build']):
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: developer-defined-tekton-pipeline
+  labels:
+    apps.tanzu.vmware.com/pipeline: test     
+spec:
+  params:
+    - name: source-url                       
+    - name: source-revision                  
+    - name: context-dir
+      type: string
+      default: springboot 
+  workspaces:
+    - name: source
+    - name: maven-settings
+  tasks:
+    - name: clone-sources
+      params:
+        - name: source-url
+          value: $(params.source-url)
+        - name: source-revision
+          value: $(params.source-revision)
+      workspaces:
+        - name: source
+          workspace: source
+      taskSpec:
+         params:
+          - name: source-url
+          - name: source-revision
+         workspaces:
+          - name: source
+         steps:
+          - name: clone
+            image: #@ data.values.testing_image
+            script: |-
+              CHECKOUT_DIR="$(workspaces.source.path)"
+              cd $CHECKOUT_DIR
+              wget -qO- $(params.source-url) | tar xvz
+    - name: build-java-test
+      params:
+        - name: MAVEN_CA_SECRET_KEY
+          value: "caFile"
+        - name: GOALS
+          value:
+            - '-B'
+            - test
+      runAfter:
+        - clone-sources
+      taskRef:
+        kind: Task
+        name: maven
+      workspaces:
+        - name: maven-settings
+          workspace: maven-settings
+        - name: source
+          workspace: source

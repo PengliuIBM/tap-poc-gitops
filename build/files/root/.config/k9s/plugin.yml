@@ -1,0 +1,58 @@
+plugin:
+  kapp-inspect:
+    shortCut: Shift-Z
+    confirm: false
+    description: Kapp inspect
+    scopes:
+      - app
+    command: sh
+    background: false
+    args:
+      - -c
+      - "export FORCE_COLOR=1;kapp inspect -a $NAME.app --namespace $NAMESPACE --color --tty 2>&1 | less -R"
+  app-kick:
+    shortCut: Shift-K
+    confirm: false
+    description: '"Kick" an app to force reconcile'
+    scopes:
+      - app
+    command: sh
+    background: true
+    args:
+      - -c
+      - |
+        kubectl patch app $NAME -n $NAMESPACE -p '{"spec": {"paused": true}}' --type=merge ; kubectl patch app $NAME -n $NAMESPACE -p '{"spec": {"paused": false}}' --type=merge
+  packageinstall-kick:
+    shortCut: Shift-K
+    confirm: false
+    description: '"Kick" a packageinstall to force reconcile'
+    scopes:
+      - packageinstall
+    command: sh
+    background: true
+    args:
+      - -c
+      - |
+        kubectl patch pkgi $NAME -n $NAMESPACE -p '{"spec": {"paused": true}}' --type=merge ; kubectl patch pkgi $NAME -n $NAMESPACE -p '{"spec": {"paused": false}}' --type=merge
+  tanzu-apps-workload-get:
+    shortCut: Shift-G
+    confirm: false
+    description: Describe a Workload
+    scopes:
+      - workload
+    command: sh
+    background: false
+    args:
+      - -c
+      - "tanzu apps workload get $NAME -n $NAMESPACE 2>&1 | less -R"
+  tanzu-apps-workload-tail:
+    shortCut: Shift-T
+    confirm: false
+    description: Tail the logs for a Workload
+    scopes:
+      - workload
+    command: sh
+    background: false
+    args:
+      - -c
+      - "tanzu apps workload tail $NAME -n $NAMESPACE 2>&1 | less -R"

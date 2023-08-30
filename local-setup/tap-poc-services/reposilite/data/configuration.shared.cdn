@@ -1,0 +1,71 @@
+{
+  "web": {
+    "forwardedIp": "X-Forwarded-For"
+  },
+  "authentication": {
+    "ldap": {
+      "enabled": false,
+      "hostname": "ldap.domain.com",
+      "port": 389,
+      "baseDn": "dc=company,dc=com",
+      "searchUserDn": "cn=reposilite,ou=admins,dc=domain,dc=com",
+      "searchUserPassword": "reposilite-admin-secret",
+      "userAttribute": "cn",
+      "userFilter": "(&(objectClass=person)(ou=Maven Users))",
+      "userType": "PERSISTENT"
+    }
+  },
+  "statistics": {
+    "enabled": false,
+    "resolvedRequestsInterval": "MONTHLY"
+  },
+  "frontend": {
+    "id": "reposilite-repository",
+    "title": "Reposilite Repository",
+    "description": "Public Maven repository hosted through the Reposilite",
+    "organizationWebsite": "https://reposilite.com",
+    "organizationLogo": "https://avatars.githubusercontent.com/u/88636591",
+    "icpLicense": ""
+  },
+  "maven": {
+    "repositories": [
+      {
+        "id": "releases",
+        "visibility": "PRIVATE",
+        "storageProvider": {
+          "type": "fs",
+          "quota": "100%",
+          "mount": ""
+        },
+        "redeployment": false,
+        "preserveSnapshots": false,
+        "proxied": [
+          {
+            "reference": "https://repo1.maven.org/maven2",
+            "store": true,
+            "allowedGroups": [],
+            "allowedExtensions": [
+              ".jar",
+              ".war",
+              ".pom",
+              ".xml",
+              ".md5",
+              ".sha1",
+              ".sha256",
+              ".sha512",
+              ".asc"
+            ],
+            "connectTimeout": 3,
+            "readTimeout": 15,
+            "authorization": {
+              "method": "BASIC",
+              "login": "",
+              "password": ""
+            },
+            "httpProxy": ""
+          }
+        ]
+      }
+    ]
+  }
+}

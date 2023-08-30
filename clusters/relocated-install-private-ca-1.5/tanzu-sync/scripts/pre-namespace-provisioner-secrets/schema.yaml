@@ -1,0 +1,45 @@
+#@data/values-schema
+#@overlay/match-child-defaults missing_ok=True
+---
+#@schema/title "Namespace Provisioner Pre Req Secret Creation"
+#@schema/desc "(internal use: DO NOT MODIFY OR OVERRIDE)"
+secrets:
+  #@schema/title "Source maven repository"
+  #@schema/desc "Coordinates to the hosted maven repository containing maven dependencies."
+  maven:
+    #@schema/title "Maven Repository URL"
+    #@schema/desc "Fully qualified URL to hosted/remote clone of maven repository including uri to artifactory repo"
+    #@schema/examples ("maven hostname artifactory.mycompany.com and repo example-repo","https://artifactory.mycompany.com/artifactory/example-repo")
+    #@schema/validation min_len=1
+    url: "${MAVEN_URL}" 
+    #@schema/title "Maven Repository Username"
+    #@schema/desc "Maven username to make pulls from the maven repository"
+    #@schema/validation min_len=0
+    username: "${MAVEN_WORKLOAD_USERNAME}"
+    #@schema/title "Maven Repository Password"
+    #@schema/desc "Maven Password to make pulls from the maven repository"
+    #@schema/validation min_len=0
+    password: "${MAVEN_WORKLOAD_PASSWORD}"
+  #@schema/title "Source git repository"
+  #@schema/desc "Coordinates to the hosted git repository"
+  git:
+    #@schema/title "Git Repository URL"
+    #@schema/desc "domain name of git"
+    #@schema/examples ("Git hostname gitlab.mycompany.com","gitlab.mycompany.com")
+    #@schema/validation min_len=1
+    host: "${GIT_HOST}"
+    #@schema/title "Git Read Only Password"
+    #@schema/desc "Password used to pull items from git"
+    #@schema/validation min_len=1
+    password: "${GIT_WORKLOAD_PASSWORD}"
+    #@schema/title "Git read only Username"
+    #@schema/desc "Username used to pull items from git"
+    #@schema/validation min_len=1
+    username: "${GIT_WORKLOAD_USERNAME}"  
+  #@schema/title "Java Truststore Config"
+  #@schema/desc "Tap Testbed creates a java truststore with custom certs."
+  javatrust:
+    #@schema/title "Java Truststore password"
+    #@schema/desc "Truststore Password to use when creating truststore"
+    #@schema/validation min_len=1
+    password: "${JAVA_TRUSTSTORE_PASSWORD}"

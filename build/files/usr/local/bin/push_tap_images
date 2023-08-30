@@ -1,0 +1,10 @@
+#!/bin/sh
+
+export IMGPKG_REGISTRY_HOSTNAME_1=$INSTALL_REGISTRY_HOSTNAME
+export IMGPKG_REGISTRY_USERNAME_1=$INSTALL_REGISTRY_USERNAME
+export IMGPKG_REGISTRY_PASSWORD_1=$INSTALL_REGISTRY_PASSWORD
+
+imgpkg copy \
+  --tar tap-packages-$TAP_VERSION.tar \
+  --to-repo $TAP_PKGR_REPO \
+  --include-non-distributable-layers

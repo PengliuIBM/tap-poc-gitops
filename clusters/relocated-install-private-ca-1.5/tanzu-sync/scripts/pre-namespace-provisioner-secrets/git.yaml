@@ -1,0 +1,48 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:base64", "base64")
+#@ load("@ytt:yaml", "yaml")
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: workload-git-auth
+  namespace: tap-install
+type: Opaque
+data:
+  git.yaml: #@ base64.encode(yaml.encode({"git": {"host": data.values.secrets.git.host, "username": data.values.secrets.git.username, "password": data.values.secrets.git.password}}))
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: git-auth
+  namespace: tap-install
+  annotations:
+    kapp.k14s.io/change-group: tanzu-sync-secrets
+type: Opaque
+data:
+  username: #@ base64.encode(data.values.secrets.git.username)
+  password: #@ base64.encode(data.values.secrets.git.password)
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: git-auth-2
+  namespace: tap-install
+  annotations:
+    kapp.k14s.io/change-group: tanzu-sync-secrets
+type: Opaque
+data:
+  username: #@ base64.encode(data.values.secrets.git.username)
+  password: #@ base64.encode(data.values.secrets.git.password)
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: git-auth-3
+  namespace: tap-install
+  annotations:
+    kapp.k14s.io/change-group: tanzu-sync-secrets
+type: Opaque
+data:
+  username: #@ base64.encode(data.values.secrets.git.username)
+  password: #@ base64.encode(data.values.secrets.git.password)

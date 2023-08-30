@@ -1,0 +1,30 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: packaging.carvel.dev/v1alpha1
+kind: PackageRepository
+metadata:
+  name: tbs-full-deps-repository
+  namespace: tap-install
+  annotations:
+    kapp.k14s.io/change-group: "tbs-pkgr"
+    kapp.k14s.io/change-rule.0: "upsert after upserting pkgi"
+    kapp.k14s.io/change-rule.1: "delete before deleting pkgi"
+spec:
+  fetch:
+    imgpkgBundle:
+      image: #@ "{}/tbs-full-deps:1.10.8".format(data.values.tap_install.package_repository.oci_repository.rsplit("/",1)[0])
+---
+apiVersion: packaging.carvel.dev/v1alpha1
+kind: PackageInstall
+metadata:
+  name: full-tbs-deps
+  namespace: tap-install
+  annotations:
+    kapp.k14s.io/change-rule.0: "upsert after upserting tbs-pkgr"
+    kapp.k14s.io/change-rule.1: "delete before deleting tbs-pkgr"
+spec:
+  serviceAccountName: tap-installer-sa
+  packageRef:
+    refName: full-tbs-deps.tanzu.vmware.com
+    versionSelection:
+      constraints: ">=1.10.8"

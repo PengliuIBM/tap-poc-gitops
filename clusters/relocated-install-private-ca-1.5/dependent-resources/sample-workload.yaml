@@ -1,0 +1,23 @@
+#@ load("@ytt:data", "data")
+
+---
+apiVersion: carto.run/v1alpha1
+kind: Workload
+metadata:
+  name: spring-sensors
+  namespace: dev
+  labels:
+    apps.tanzu.vmware.com/workload-type: web
+    apps.tanzu.vmware.com/has-tests: "true"
+  annotations:
+    kapp.k14s.io/change-rule.0: "upsert after upserting grype-db-server"
+spec:
+  build:
+    env:
+    - name: BP_JVM_VERSION
+      value: "17"
+  source:
+    git:
+      ref:
+        branch: #@ data.values.git_ref
+      url: #@ "{}/spring-sensors".format(data.values.git_server)

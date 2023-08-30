@@ -1,0 +1,20 @@
+---
+apiVersion: secretgen.carvel.dev/v1alpha1
+kind: SecretExport
+metadata:
+  name: tap-wildcard
+  namespace: tap-install
+spec:
+  toNamespaces:
+  - '*'
+---
+apiVersion: projectcontour.io/v1
+kind: TLSCertificateDelegation
+metadata:
+  name: tap-wildcard
+  namespace: tap-install
+spec:
+  delegations:
+  - secretName: tap-wildcard
+    targetNamespaces:
+    - "*"

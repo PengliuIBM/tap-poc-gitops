@@ -1,0 +1,13 @@
+#@data/values
+---
+#! The only required parameter is the name of the namespace. All additional values provided here like scanpolicy and pipeline
+#! for a namespace will be available under data.values for templating additional sources as data.values.scanpolicy and data.values.pipeline respectively
+namespaces:
+- name: dev
+  testing_image: harbor.tanzu-seal.io/tkg/tap/pipeline/gradle:8.1-jdk17
+  maven_image: harbor.tanzu-seal.io/tkg/tap/pipeline/maven:3.6-openjdk-17
+  ubi_minimal_image: harbor.tanzu-seal.io/tkg/tap/pipeline/ubi-minimal:8.7
+- name: qa
+  testing_image: harbor.tanzu-seal.io/tkg/tap/pipeline/gradle:8.1-jdk17
+  maven_image: harbor.tanzu-seal.io/tkg/tap/pipeline/maven:3.6-openjdk-17
+  ubi_minimal_image: harbor.tanzu-seal.io/tkg/tap/pipeline/ubi-minimal:8.7
